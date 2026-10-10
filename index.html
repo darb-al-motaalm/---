@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>دَرْب المتعلم | منصة التركيز والتفوق الدراسي</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Cairo -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        cairo: ['Cairo', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Cairo', sans-serif; transition: background-color 0.3s, color 0.3s; }
+        .perspective { perspective: 1000px; }
+        .transform-style-3d { transform-style: preserve-3d; }
+        .backface-hidden { backface-visibility: hidden; }
+        .rotate-y-180 { transform: rotateY(180deg); }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen flex flex-col justify-between">
+
+    <!-- رأس التطبيق (Navbar) -->
+    <header class="w-full bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700 sticky top-0 z-50 transition-colors">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center flex-wrap gap-3">
+            <div class="flex items-center gap-3">
+                <div class="bg-primary-600 text-white p-2.5 rounded-xl shadow-md shadow-primary-500/20">
+                    <i class="fa-solid fa-graduation-cap text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-black tracking-wide flex items-center gap-2">
+                        <span>دَرْب المتعلم</span>
+                    </h1>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">رفيقك الذكي للتفوق والتركيز العميق</p>
+                </div>
+            </div>
+
+            <!-- إحصائيات سريعة وأزرار التحكم -->
+            <div class="flex items-center gap-3 flex-wrap">
+                <!-- الـ Streak السلسلة اليومية -->
+                <div class="flex items-center gap-1.5 bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 px-3 py-1.5 rounded-xl border border-amber-200 dark:border-amber-800 text-xs font-bold" title="عدد الأيام المتتالية التي درست فيها">
+                    <i class="fa-solid fa-fire text-amber-500 animate-pulse"></i>
+                    <span>سلسلة الأيام: <strong id="streak-count">0</strong> يوم</span>
+                </div>
+
+                <!-- الرتبة الحالية -->
+                <div class="flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 px-3 py-1.5 rounded-xl border border-emerald-200 dark:border-emerald-800 text-xs font-bold">
+                    <i class="fa-solid fa-award"></i>
+                    <span id="user-rank">طالب مبتدئ</span>
+                </div>
+
+                <!-- زر التبديل بين الوضع الليلي والنهاري -->
+                <button onclick="toggleDarkMode()" class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-600 transition-all">
+                    <i id="theme-icon" class="fa-solid fa-moon"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- المحتوى الرئيسي (Main Content SPA) -->
+    <main class="max-w-6xl mx-auto px-4 py-6 w-full grid grid-cols-1 lg:grid-cols-3 gap-6 flex-grow">
+        
+        <!-- العمود الأيمن والأوسط: مؤقت البومودورو، النبتة، وبطاقات الحفظ -->
+        <section class="lg:col-span-2 flex flex-col gap-6">
+            
+            <!-- بطاقة المؤقت الكبرى -->
+            <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-700/60 flex flex-col items-center relative">
+                
+                <!-- أزرار اختيار وضع المؤقت -->
+                <div class="flex bg-slate-100 dark:bg-slate-700/50 p-1.5 rounded-2xl gap-1 mb-6 w-full max-w-md">
+                    <button onclick="switchMode('study')" id="mode-study" class="flex-1 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all bg-primary-600 text-white shadow-sm">جلسة دراسة</button>
+                    <button onclick="switchMode('shortBreak')" id="mode-shortBreak" class="flex-1 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all text-slate-600 dark:text-slate-300 hover:bg-slate-200/60">استراحة قصيرة</button>
+                    <button onclick="switchMode('longBreak')" id="mode-longBreak" class="flex-1 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all text-slate-600 dark:text-slate-300 hover:bg-slate-200/60">استراحة طويلة</button>
+                </div>
+
+                <!-- عداد الوقت الرقمي -->
+                <div class="relative flex items-center justify-center my-2">
+                    <div class="text-7xl md:text-8xl font-black tracking-wider font-mono text-slate-800 dark:text-slate-100" id="timer-display">25:00</div>
+                </div>
+
+                <!-- أزرار التحكم بالمؤقت -->
+                <div class="flex items-center gap-3 mt-4">
+                    <button onclick="toggleTimer()" id="start-btn" class="bg-primary-600 hover:bg-primary-700 text-white font-bold px-8 py-3 rounded-2xl shadow-lg shadow-primary-600/30 transition-all flex items-center gap-2">
+                        <i id="start-icon" class="fa-solid fa-play"></i>
+                        <span id="start-text">بدء التركيز</span>
+                    </button>
+                    <button onclick="resetTimer()" class="bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-200 font-bold px-4 py-3 rounded-2xl transition-all">
+                        <i class="fa-solid fa-rotate-right"></i>
+                    </button>
+                    <button onclick="toggleTimerSettings()" class="bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-200 font-bold px-4 py-3 rounded-2xl transition-all" title="تخصيص الأوقات">
+                        <i class="fa-solid fa-gear"></i>
+                    </button>
+                </div>
+
+                <!-- لوحة إعدادات الدقائق المخصصة (تظهر عند النقر) -->
+                <div id="timer-settings" class="hidden mt-6 pt-4 border-t border-slate-100 dark:border-slate-700 w-full flex justify-center gap-4 text-xs font-semibold">
+                    <div class="flex items-center gap-1">
+                        <span>دراسة:</span>
+                        <input type="number" id="input-study-min" value="25" min="1" max="120" class="w-14 bg-slate-50 dark:bg-slate-700 border rounded-lg px-2 py-1 text-center">
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <span>استراحة:</span>
+                        <input type="number" id="input-break-min" value="5" min="1" max="60" class="w-14 bg-slate-50 dark:bg-slate-700 border rounded-lg px-2 py-1 text-center">
+                    </div>
+                    <button onclick="saveCustomDuration()" class="bg-primary-600 text-white px-3 py-1 rounded-lg">حفظ</button>
+                </div>
+            </div>
+
+            <!-- بطاقة النبتة والتطور والعوالم -->
+            <div class="bg-gradient-to-r from-emerald-600 to-teal-700 dark:from-emerald-800 dark:to-teal-900 rounded-3xl p-6 text-white shadow-xl shadow-emerald-500/10 flex flex-col md:flex-row items-center justify-between gap-4 relative overflow-hidden">
+                <div class="z-10 flex-1">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="bg-white/20 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider">حديقة دَرْب المتعلم</span>
+                        <!-- أزرار اختيار نوع النبتة -->
+                        <select id="plant-type-select" onchange="changePlantType(this.value)" class="bg-black/20 text-xs rounded-lg px-2 py-1 border border-white/20 focus:outline-none text-white">
+                            <option value="tree" class="text-slate-800">شجرة النور 🌳</option>
+                            <option value="cactus" class="text-slate-800">صبار الصمود 🌵</option>
+                            <option value="cherry" class="text-slate-800">زهرة الكرز 🌸</option>
+                            <option value="apple" class="text-slate-800">شجرة المعرفة 🍎</option>
+                        </select>
+                    </div>
+                    <h3 class="text-xl font-bold" id="plant-title-text">بذرة في البداية 🌱</h3>
+                    <p class="text-xs text-emerald-100 mt-1" id="plant-desc-text">أكمل جلسات التركيز لتسقي نبتتك وتراها تنمو وتزهر يوماً بعد يوم!</p>
+                    <div class="mt-4 flex items-center gap-3">
+                        <div class="flex-1 bg-black/20 h-2.5 rounded-full overflow-hidden">
+                            <div id="plant-progress-bar" class="bg-amber-300 h-full transition-all duration-500" style="width: 0%;"></div>
+                        </div>
+                        <span class="text-xs font-bold" id="plant-progress-text">0 / 4 جلسات</span>
+                    </div>
+                </div>
+                <!-- أيقونة النبتة -->
+                <div class="bg-white/20 p-5 rounded-2xl backdrop-blur-md flex items-center justify-center text-6xl z-10 shadow-inner min-w-[100px] h-[100px]" id="plant-icon-display">
+                    🌱
+                </div>
+            </div>
+
+            <!-- ميزة: بطاقات الحفظ السريع (Flashcards) -->
+            <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-700/60">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                        <i class="fa-solid fa-layer-group text-primary-600"></i>
+                        بطاقات الحفظ والمراجعة السريعة (Flashcards)
+                    </h3>
+                    <button onclick="toggleFlashcardForm()" class="text-xs bg-primary-600 text-white px-3 py-1.5 rounded-xl font-semibold hover:bg-primary-700 transition-all">
+                        <i class="fa-solid fa-plus ml-1"></i> إفادة جديدة
+                    </button>
+                </div>
+
+                <!-- نموذج إضافة بطاقة جديدة -->
+                <div id="flashcard-form" class="hidden mb-4 bg-slate-50 dark:bg-slate-700/40 p-4 rounded-2xl border border-slate-200 dark:border-slate-600">
+                    <input type="text" id="fc-question" placeholder="السؤال أو المصطلح (مثلاً: C'est quoi un roman?)" class="w-full bg-white dark:bg-slate-800 border dark:border-slate-600 px-3 py-2 rounded-xl text-sm mb-2 focus:outline-none">
+                    <input type="text" id="fc-answer" placeholder="الإجابة أو التوضيح" class="w-full bg-white dark:bg-slate-800 border dark:border-slate-600 px-3 py-2 rounded-xl text-sm mb-3 focus:outline-none">
+                    <button onclick="addFlashcard()" class="w-full bg-primary-600 text-white py-2 rounded-xl text-xs font-bold">إضافة البطاقة</button>
+                </div>
+
+                <!-- عرض البطاقة وتصفحها -->
+                <div id="flashcards-container" class="relative">
+                    <div id="flashcard-card" onclick="flipFlashcard()" class="w-full h-40 bg-slate-100 dark:bg-slate-700/60 rounded-2xl p-6 flex flex-col items-center justify-center text-center cursor-pointer border border-slate-200 dark:border-slate-600 transition-all hover:border-primary-500 shadow-inner relative">
+                        <span class="text-xs text-primary-600 font-bold mb-2 uppercase tracking-wider" id="fc-type-label">السؤال (انقر للقلب 🔄)</span>
+                        <p class="text-base font-bold text-slate-800 dark:text-slate-100" id="fc-content-text">لا توجد بطاقات محفوظة بعد. أضف بطاقتك الأولى!</p>
+                    </div>
+                    <div class="flex justify-between items-center mt-3 text-xs text-slate-500">
+                        <button onclick="prevFlashcard()" class="hover:text-primary-600 font-bold"><i class="fa-solid fa-arrow-right"></i> السابقة</button>
+                        <span id="fc-counter">0 من 0</span>
+                        <button onclick="nextFlashcard()" class="hover:text-primary-600 font-bold">التالية <i class="fa-solid fa-arrow-left"></i></button>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- العمود الأيسر: الأفكار العابرة، المهام، والأصوات -->
+        <section class="flex flex-col gap-6">
+
+            <!-- صندوق الأفكار العابرة (Brain Dump Box) -->
+            <div class="bg-amber-50/70 dark:bg-amber-950/20 rounded-3xl p-5 border border-amber-200/80 dark:border-amber-800/40">
+                <h3 class="font-bold text-amber-800 dark:text-amber-400 text-sm flex items-center gap-2 mb-2">
+                    <i class="fa-solid fa-lightbulb"></i>
+                    صندوق التشتت والأفكار العابرة (Brain Dump)
+                </h3>
+                <p class="text-xs text-amber-700/80 dark:text-amber-300/70 mb-3">طرق فكرة ببالك أثناء الدراسة؟ اكتبها هنا لتفرغ عقلك وتستأنف تركيزك بسرعة!</p>
+                <div class="flex gap-2">
+                    <input type="text" id="brain-dump-input" placeholder="اكتب الفكرة العابرة..." class="flex-1 bg-white dark:bg-slate-800 border border-amber-200 dark:border-amber-800/60 px-3 py-2 rounded-xl text-xs focus:outline-none">
+                    <button onclick="addBrainDump()" class="bg-amber-600 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-amber-700"><i class="fa-solid fa-paper-plane"></i></button>
+                </div>
+                <ul id="brain-dump-list" class="mt-3 flex flex-col gap-1.5 max-h-32 overflow-y-auto text-xs">
+                    <!-- تتولى الجافاسكريبت ملأها -->
+                </ul>
+            </div>
+
+            <!-- إدارة المهام السريعة (Micro-Tasks) -->
+            <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-700/60 flex flex-col h-[320px]">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                        <i class="fa-solid fa-list-check text-primary-600"></i>
+                        مهام الدراسة السريعة
+                    </h3>
+                    <span class="text-xs bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-2.5 py-1 rounded-lg font-semibold" id="tasks-counter">0 من 0</span>
+                </div>
+
+                <form id="task-form" onsubmit="addTask(event)" class="flex gap-2 mb-4">
+                    <input type="text" id="task-input" placeholder="أضف مهمة دراسية جديدة..." autocomplete="off" class="flex-1 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 px-3.5 py-2 rounded-xl text-xs focus:outline-none focus:border-primary-500">
+                    <button type="submit" class="bg-primary-600 hover:bg-primary-700 text-white px-3.5 py-2 rounded-xl transition-all">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
+                </form>
+
+                <div id="tasks-list" class="overflow-y-auto flex-1 flex flex-col gap-2 pr-1 custom-scroll">
+                    <!-- الأغراض هنا -->
+                </div>
+            </div>
+
+            <!-- أصوات التركيز الخلفية (Ambient Sounds) -->
+            <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-700/60">
+                <h3 class="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2 mb-4">
+                    <i class="fa-solid fa-headphones text-primary-600"></i>
+                    أصوات خلفية للتركيز
+                </h3>
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="toggleAmbientSound('rain', this)" class="sound-btn flex items-center gap-3 p-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-primary-500 bg-slate-50 dark:bg-slate-700/40 text-xs font-semibold">
+                        <i class="fa-solid fa-cloud-rain text-blue-500 text-base"></i>
+                        <span>مطر خفيف</span>
+                    </button>
+                    <button onclick="toggleAmbientSound('cafe', this)" class="sound-btn flex items-center gap-3 p-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-primary-500 bg-slate-50 dark:bg-slate-700/40 text-xs font-semibold">
+                        <i class="fa-solid fa-mug-hot text-amber-500 text-base"></i>
+                        <span>مقهى هادئ</span>
+                    </button>
+                    <button onclick="toggleAmbientSound('forest', this)" class="sound-btn flex items-center gap-3 p-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-primary-500 bg-slate-50 dark:bg-slate-700/40 text-xs font-semibold">
+                        <i class="fa-solid fa-tree text-emerald-500 text-base"></i>
+                        <span>طبيعة وغابات</span>
+                    </button>
+                    <button onclick="toggleAmbientSound('whitenoise', this)" class="sound-btn flex items-center gap-3 p-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-primary-500 bg-slate-50 dark:bg-slate-700/40 text-xs font-semibold">
+                        <i class="fa-solid fa-wind text-purple-500 text-base"></i>
+                        <span>ضوضاء بيضاء</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- مولد الاقتباسات التحفيزية -->
+            <div class="bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-3xl p-5 shadow-lg relative overflow-hidden">
+                <div class="flex justify-between items-start mb-2">
+                    <i class="fa-solid fa-quote-right text-white/30 text-2xl"></i>
+                    <button onclick="generateQuote()" class="text-xs bg-white/20 hover:bg-white/30 px-2.5 py-1 rounded-lg font-bold"><i class="fa-solid fa-rotate"></i> اقتباس جديد</button>
+                </div>
+                <p id="quote-text" class="text-xs font-semibold leading-relaxed">"النجاح هو مجرد مجموع محاولات صغيرة تتكرر كل يوم."</p>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- الفوتر -->
+    <footer class="w-full text-center py-6 text-xs text-slate-400 border-t border-slate-200 dark:border-slate-800 mt-10">
+        <p>صُمّم بكل حب ليكون رفيقك في <strong class="text-primary-600">دَرْب المتعلم</strong> للتفوق والنجاح 🚀</p>
+    </footer>
+
+    <!-- عناصر الصوت المخفية -->
+    <audio id="audio-rain" loop src="https://assets.mixkit.co/active_storage/sfx/1255/1255-preview.mp3"></audio>
+    <audio id="audio-cafe" loop src="https://assets.mixkit.co/active_storage/sfx/321/321-preview.mp3"></audio>
+    <audio id="audio-forest" loop src="https://assets.mixkit.co/active_storage/sfx/1253/1253-preview.mp3"></audio>
+    <audio id="audio-whitenoise" loop src="https://assets.mixkit.co/active_storage/sfx/2655/2655-preview.mp3"></audio>
+
+    <!-- الجافاسكريبت البرمجي المنظم والموثق -->
+    <script>
+        // --- 1. حالة التطبيق ومتغيراته (State Variables) ---
+        let timer = null;
+        let currentMode = 'study';
+        let timeLeft = 25 * 60;
+        let isRunning = false;
+
+        let durations = {
+            study: 25 * 60,
+            shortBreak: 5 * 60,
+            longBreak: 15 * 60
+        };
+
+        let appData = {
+            sessionsToday: 0,
+            totalMinutes: 0,
+            streak: 1,
+            lastStudyDate: new Date().toDateString(),
+            plantStage: 0,
+            plantType: 'tree',
+            tasks: [],
+            brainDump: [],
+            flashcards: [
+                { q: "ما هي ميزة التشتت الفكري (Brain Dump)؟", a: "تفريغ الأفكار العابرة فوراً للتركيز على المذاكرة بدون توتر." }
+            ],
+            currentFcIndex: 0,
+            fcFlipped: false,
+            darkMode: false
+        };
+
+        const quotes = [
+            "النجاح هو مجرد مجموع محاولات صغيرة تتكرر كل يوم.",
+            "الرحلة نحو القمة تحتاج قدماً ثابتة وإرادة حقيقية.",
+            "لا تحلم بالنجاح، بل قم واعمل من أجله!",
+            "التركيز هو المفتاح الذهبي لفتح أبواب الإبداع.",
+            "كل دقيقة تدرسها اليوم هي استثمار في مستقبلك المشرق."
+        ];
+
+        // --- 2. تحميل البيانات والبدء ---
+        document.addEventListener('DOMContentLoaded', () => {
+            loadFromLocalStorage();
+            checkStreak();
+            updateDisplay();
+            renderTasks();
+            renderBrainDump();
+            renderFlashcards();
+            updatePlantUI();
+            updateStatsUI();
+            applyTheme();
+        });
+
+        function saveToLocalStorage() {
+            localStorage.setItem('darb_learner_data', JSON.stringify(appData));
+        }
+
+        function loadFromLocalStorage() {
+            const saved = localStorage.getItem('darb_learner_data');
+            if (saved) {
+                try {
+                    appData = { ...appData, ...JSON.parse(saved) };
+                } catch (e) { console.error('Error loading data', e); }
+            }
+        }
+
+        // --- 3. الوضع الليلي (Dark Mode) ---
+        function toggleDarkMode() {
+            appData.darkMode = !appData.darkMode;
+            saveToLocalStorage();
+            applyTheme();
+        }
+
+        function applyTheme() {
+            const html = document.documentElement;
+            const themeIcon = document.getElementById('theme-icon');
+            if (appData.darkMode) {
+                html.classList.add('dark');
+                themeIcon.className = 'fa-solid fa-sun text-amber-400';
+            } else {
+                html.classList.remove('dark');
+                themeIcon.className = 'fa-solid fa-moon';
+            }
+        }
+
+        // --- 4. السلسلة اليومية والرتب (Streak & Ranks) ---
+        function checkStreak() {
+            const today = new Date().toDateString();
+            if (appData.lastStudyDate !== today) {
+                const lastDate = new Date(appData.lastStudyDate);
+                const currentDate = new Date();
+                const diffTime = Math.abs(currentDate - lastDate);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                if (diffDays > 2) {
+                    appData.streak = 1; // إعادة الضبط عند الانقطاع أكثر من يوم
+                }
+            }
+        }
+
+        function calculateRank() {
+            const hours = appData.totalMinutes / 60;
+            if (hours < 2) return 'طالب مبتدئ 🐣';
+            if (hours < 10) return 'طالب مجتهد 📚';
+            if (hours < 25) return 'خبير تركيز 🎯';
+            return 'عبقري الدرب 🧠✨';
+        }
+
+        // --- 5. المؤقت والإعدادات المخصصة ---
+        function switchMode(mode) {
+            if (isRunning) {
+                if (!confirm('المؤقت يعمل حالياً، هل تريد تغيير الوضع؟')) return;
+                pauseTimer();
+            }
+            currentMode = mode;
+            timeLeft = durations[mode];
+
+            ['study', 'shortBreak', 'longBreak'].forEach(m => {
+                const btn = document.getElementById(`mode-${m}`);
+                if (m === mode) {
+                    btn.className = 'flex-1 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all bg-primary-600 text-white shadow-sm';
+                } else {
+                    btn.className = 'flex-1 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all text-slate-600 dark:text-slate-300 hover:bg-slate-200/60';
+                }
+            });
+
+            updateDisplay();
+        }
+
+        function toggleTimer() { isRunning ? pauseTimer() : startTimer(); }
+
+        function startTimer() {
+            isRunning = true;
+            document.getElementById('start-icon').className = 'fa-solid fa-pause';
+            document.getElementById('start-text').textContent = 'إيقاف مؤقت';
+            document.getElementById('start-btn').className = 'bg-amber-500 hover:bg-amber-600 text-white font-bold px-8 py-3 rounded-2xl shadow-lg shadow-amber-500/30 transition-all flex items-center gap-2';
+
+            timer = setInterval(() => {
+                if (timeLeft > 0) {
+                    timeLeft--;
+                    updateDisplay();
+                } else {
+                    clearInterval(timer);
+                    handleTimerComplete();
+                }
+            }, 1000);
+        }
+
+        function pauseTimer() {
+            isRunning = false;
+            clearInterval(timer);
+            document.getElementById('start-icon').className = 'fa-solid fa-play';
+            document.getElementById('start-text').textContent = 'استئناف التركيز';
+            document.getElementById('start-btn').className = 'bg-primary-600 hover:bg-primary-700 text-white font-bold px-8 py-3 rounded-2xl shadow-lg shadow-primary-600/30 transition-all flex items-center gap-2';
+        }
+
+        function resetTimer() {
+            pauseTimer();
+            timeLeft = durations[currentMode];
+            updateDisplay();
+        }
+
+        function updateDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            document.getElementById('timer-display').textContent = 
+                `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        function toggleTimerSettings() {
+            const panel = document.getElementById('timer-settings');
+            panel.classList.toggle('hidden');
+        }
+
+        function saveCustomDuration() {
+            const studyMin = parseInt(document.getElementById('input-study-min').value) || 25;
+            const breakMin = parseInt(document.getElementById('input-break-min').value) || 5;
+            durations.study = studyMin * 60;
+            durations.shortBreak = breakMin * 60;
+            resetTimer();
+            toggleTimerSettings();
+            alert('تم حفظ إعدادات الأوقات الجديدة!');
+        }
+
+        function handleTimerComplete() {
+            pauseTimer();
+            if (currentMode === 'study') {
+                const today = new Date().toDateString();
+                if (appData.lastStudyDate !== today) {
+                    appData.streak++;
+                    appData.lastStudyDate = today;
+                }
+
+                appData.sessionsToday++;
+                appData.totalMinutes += Math.round(durations.study / 60);
+
+                if (appData.plantStage < 4) appData.plantStage++;
+
+                saveToLocalStorage();
+                updateStatsUI();
+                updatePlantUI();
+                alert('🎉 ممتاز جداً! أتممت جلسة التركيز بنجاح وازدادت نبتتك طاقة ونمواً.');
+            } else {
+                alert('⏰ انتهت الاستراحة! جاهز للعودة إلى درب الإنجاز؟');
+            }
+            resetTimer();
+        }
+
+        // --- 6. حديقة النباتات المتنوعة ---
+        const plantIcons = {
+            tree: ['🌱', '🌿', '🪴', '🌳', '🌸'],
+            cactus: ['🌱', '🌵', '🌵', '🪴', '🌺'],
+            cherry: ['🌱', '🌿', '🌱', '🌸', '🌸✨'],
+            apple: ['🌱', '🌿', '🪴', '🌳', '🍎']
+        };
+
+        function changePlantType(type) {
+            appData.plantType = type;
+            saveToLocalStorage();
+            updatePlantUI();
+        }
+
+        function updatePlantUI() {
+            document.getElementById('plant-type-select').value = appData.plantType || 'tree';
+            const icons = plantIcons[appData.plantType || 'tree'];
+            document.getElementById('plant-icon-display').textContent = icons[appData.plantStage];
+
+            const progressPercent = (appData.plantStage / 4) * 100;
+            document.getElementById('plant-progress-bar').style.width = `${progressPercent}%`;
+            document.getElementById('plant-progress-text').textContent = `${appData.plantStage} / 4 جلسات`;
+        }
+
+        function updateStatsUI() {
+            document.getElementById('streak-count').textContent = appData.streak;
+            document.getElementById('user-rank').textContent = calculateRank();
+        }
+
+        // --- 7. بطاقات الحفظ السريع (Flashcards) ---
+        function toggleFlashcardForm() {
+            document.getElementById('flashcard-form').classList.toggle('hidden');
+        }
+
+        function addFlashcard() {
+            const q = document.getElementById('fc-question').value.trim();
+            const a = document.getElementById('fc-answer').value.trim();
+            if (!q || !a) return;
+
+            appData.flashcards.push({ q, a });
+            document.getElementById('fc-question').value = '';
+            document.getElementById('fc-answer').value = '';
+            toggleFlashcardForm();
+            appData.currentFcIndex = appData.flashcards.length - 1;
+            appData.fcFlipped = false;
+            saveToLocalStorage();
+            renderFlashcards();
+        }
+
+        function flipFlashcard() {
+            if (appData.flashcards.length === 0) return;
+            appData.fcFlipped = !appData.fcFlipped;
+            renderFlashcards();
+        }
+
+        function nextFlashcard() {
+            if (appData.flashcards.length === 0) return;
+            appData.currentFcIndex = (appData.currentFcIndex + 1) % appData.flashcards.length;
+            appData.fcFlipped = false;
+            renderFlashcards();
+        }
+
+        function prevFlashcard() {
+            if (appData.flashcards.length === 0) return;
+            appData.currentFcIndex = (appData.currentFcIndex - 1 + appData.flashcards.length) % appData.flashcards.length;
+            appData.fcFlipped = false;
+            renderFlashcards();
+        }
+
+        function renderFlashcards() {
+            const cardText = document.getElementById('fc-content-text');
+            const labelText = document.getElementById('fc-type-label');
+            const counter = document.getElementById('fc-counter');
+
+            if (appData.flashcards.length === 0) {
+                cardText.textContent = "لا توجد بطاقات محفوظة بعد. أضف بطاقتك الأولى!";
+                labelText.textContent = "السؤال";
+                counter.textContent = "0 من 0";
+                return;
+            }
+
+            const current = appData.flashcards[appData.currentFcIndex];
+            counter.textContent = `${appData.currentFcIndex + 1} من ${appData.flashcards.length}`;
+
+            if (appData.fcFlipped) {
+                labelText.textContent = "الإجابة 💡";
+                cardText.textContent = current.a;
+            } else {
+                labelText.textContent = "السؤال (انقر للقلب 🔄)";
+                cardText.textContent = current.q;
+            }
+        }
+
+        // --- 8. صندوق الأفكار العابرة (Brain Dump) ---
+        function addBrainDump() {
+            const input = document.getElementById('brain-dump-input');
+            const text = input.value.trim();
+            if (!text) return;
+
+            appData.brainDump.push(text);
+            input.value = '';
+            saveToLocalStorage();
+            renderBrainDump();
+        }
+
+        function deleteBrainDump(index) {
+            appData.brainDump.splice(index, 1);
+            saveToLocalStorage();
+            renderBrainDump();
+        }
+
+        function renderBrainDump() {
+            const list = document.getElementById('brain-dump-list');
+            list.innerHTML = '';
+            appData.brainDump.forEach((item, index) => {
+                const li = document.createElement('li');
+                li.className = 'flex justify-between items-center bg-white dark:bg-slate-800 p-2 rounded-xl border border-amber-200/60 dark:border-amber-900/40';
+                li.innerHTML = `
+                    <span class="truncate">${escapeHtml(item)}</span>
+                    <button onclick="deleteBrainDump(${index})" class="text-amber-600 hover:text-rose-500 mr-2"><i class="fa-solid fa-xmark"></i></button>
+                `;
+                list.appendChild(li);
+            });
+        }
+
+        // --- 9. إدارة المهام السريعة ---
+        function addTask(event) {
+            event.preventDefault();
+            const input = document.getElementById('task-input');
+            const text = input.value.trim();
+            if (!text) return;
+
+            appData.tasks.push({ id: Date.now(), text, completed: false });
+            input.value = '';
+            saveToLocalStorage();
+            renderTasks();
+        }
+
+        function toggleTask(id) {
+            const task = appData.tasks.find(t => t.id === id);
+            if (task) {
+                task.completed = !task.completed;
+                saveToLocalStorage();
+                renderTasks();
+            }
+        }
+
+        function deleteTask(id) {
+            appData.tasks = appData.tasks.filter(t => t.id !== id);
+            saveToLocalStorage();
+            renderTasks();
+        }
+
+        function renderTasks() {
+            const listContainer = document.getElementById('tasks-list');
+            const counterSpan = document.getElementById('tasks-counter');
+            
+            const total = appData.tasks.length;
+            const completed = appData.tasks.filter(t => t.completed).length;
+            counterSpan.textContent = `${completed} من ${total}`;
+
+            if (total === 0) {
+                listContainer.innerHTML = `<p class="text-center text-xs text-slate-400 py-8">لا توجد مهام حتي الآن.</p>`;
+                return;
+            }
+
+            listContainer.innerHTML = '';
+            appData.tasks.forEach(task => {
+                const item = document.createElement('div');
+                item.className = `flex items-center justify-between p-2.5 rounded-xl border transition-all ${task.completed ? 'bg-slate-50 dark:bg-slate-700/20 opacity-60' : 'bg-white dark:bg-slate-700/50 shadow-sm'}`;
+                item.innerHTML = `
+                    <div class="flex items-center gap-2.5 overflow-hidden">
+                        <input type="checkbox" ${task.completed ? 'checked' : ''} onclick="toggleTask(${task.id})" class="w-4 h-4 text-primary-600 rounded">
+                        <span class="text-xs font-semibold truncate ${task.completed ? 'line-through text-slate-400' : ''}">${escapeHtml(task.text)}</span>
+                    </div>
+                    <button onclick="deleteTask(${task.id})" class="text-slate-400 hover:text-rose-500 p-1"><i class="fa-solid fa-trash-can text-xs"></i></button>
+                `;
+                listContainer.appendChild(item);
+            });
+        }
+
+        // --- 10. أصوات التركيز والاقتباسات ---
+        let activeAudio = null;
+        let activeBtn = null;
+
+        function toggleAmbientSound(soundName, btn) {
+            const audio = document.getElementById(`audio-${soundName}`);
+
+            if (activeAudio === audio) {
+                audio.pause();
+                activeAudio = null;
+                btn.classList.remove('border-primary-500', 'bg-primary-50');
+                return;
+            }
+
+            if (activeAudio) {
+                activeAudio.pause();
+                if (activeBtn) activeBtn.classList.remove('border-primary-500', 'bg-primary-50');
+            }
+
+            audio.play().catch(e => console.log(e));
+            activeAudio = audio;
+            activeBtn = btn;
+            btn.classList.add('border-primary-500', 'bg-primary-50');
+        }
+
+        function generateQuote() {
+            const randomIndex = Math.floor(Math.random() * quotes.length);
+            document.getElementById('quote-text').textContent = `"${quotes[randomIndex]}"`;
+        }
+
+        function escapeHtml(text) {
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+    </script>
+</body>
+</html>
